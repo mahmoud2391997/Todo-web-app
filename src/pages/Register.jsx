@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as Yup from "yup";
@@ -12,6 +12,8 @@ export const registerSchema = Yup.object().shape({
 });
 
 const RegisterForm = () => {
+  const [authError, setAuthError] = useState(null); // State to store error messages
+
   const navigate = useNavigate();
 
   const {
@@ -24,16 +26,16 @@ const RegisterForm = () => {
 
   const onSubmit = (data) => {
     console.log(data);
-    registerRequest(data, navigate);
+    registerRequest(data, navigate, setAuthError);
   };
 
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
-      className="max-w-md mx-auto mt-10 p-5 border rounded shadow-md"
+      className="max-w-md mx-auto mt-[10%] p-5 border rounded shadow-md"
     >
       <h2 className="text-xl mb-4">Register</h2>
-
+      {authError && <p className="text-red-500 text-sm mb-4">{authError}</p>}
       <div className="mb-4">
         <label className="block text-sm font-medium text-gray-700">Email</label>
         <input
@@ -68,6 +70,14 @@ const RegisterForm = () => {
       >
         Register
       </button>
+      <div className="mt-3 ">
+        <p className="text-center">
+          Already have an account,
+          <a className="text-blue-500 ml-1 cursor-pointer" href="/login">
+            Login
+          </a>
+        </p>
+      </div>
     </form>
   );
 };

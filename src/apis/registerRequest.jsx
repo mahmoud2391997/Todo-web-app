@@ -1,14 +1,21 @@
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
 
-export default function registerRequest(data, navigate) {
-  axios
-    .post("https://task-manage-app.glitch.me/auth/register", data)
-    .then((response) => {
-      if (response.data.success) {
-        sessionStorage.setItem("token", response.data.token);
-        // navigate("/", { replace: true });
-        navigate("/owned-tasks", { replace: true });
-      }
-    });
+export default async function registerRequest(data, navigate, setAuthError) {
+  try {
+    const response = await axios.post(
+      "https://task-manage-app.glitch.me/auth/register",
+      data
+    );
+    if (response.data.success) {
+      sessionStorage.setItem("token", response.data.token);
+      // navigate("/", { replace: true });
+      navigate("/board", { replace: true });
+    }
+  } catch (error) {
+    if (error.response && error.response.status === 401) {
+      setAuthError("Unauthorized: Email Already In Use!"); // Display unauthorized error
+    } else {
+      setAuthError("Regisration failed"); // Display a general error message
+    }
+  }
 }
