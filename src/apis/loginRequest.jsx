@@ -1,7 +1,7 @@
 import axios from "axios";
 
-export default function login(data, navigate, setAuthError) {
-  axios
+export default async function login(data, navigate, setAuthError) {
+ await axios
     .post("https://task-manage-app.glitch.me/auth/login", data)
     .then((response) => {
       if (response.data.success) {
