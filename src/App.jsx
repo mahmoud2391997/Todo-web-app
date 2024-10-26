@@ -1,4 +1,5 @@
 import {
+  HashRouter ,
   BrowserRouter as Router,
   Routes,
   Route,
@@ -13,28 +14,18 @@ function App() {
   return (
     <Router>
       <Routes>
-        <Route
-          path="/login"
-          element={ <Login /> }
-        />
+        <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route
           path="/owned-tasks"
-          element={
-           (
-              <KanbanBoard type={"owned"} />
-            )
-          }
+          element={<KanbanBoard type="owned" />}
         />
         <Route
           path="/assigned-tasks"
-          element={
- (
-              <KanbanBoard type={"assigned"} />
-            ) 
-          }
+          element={<KanbanBoard type="assigned" />}
         />
-        <Route path="*" element={<Navigate to="/login" />} />
+        {/* Redirect unknown routes to /login */}
+        <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </Router>
   );
