@@ -5,12 +5,13 @@ import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as Yup from "yup";
-import { addTask, changeTaskState } from "../Redux/tasks/actions";
 import TaskForm from "../components/TaskForm";
 import TaskCard from "../components/TaskCard";
 import {
   createOwnedTask,
   fetchOwnedTasks,
+  updateOwnedTask,
+  moveTask,
 } from "../Redux/tasks/ownedTaskSlice";
 import { fetchAssignedTasks } from "../Redux/tasks/assignedTaskSlice";
 
@@ -71,9 +72,12 @@ const KanbanBoard = ({ type }) => {
     if (!destination || source.droppableId === destination.droppableId) {
       return;
     }
+    dispatch(moveTask(draggableId, destination.droppableId));
 
     // Dispatch action to update the task's state
-    dispatch(changeTaskState(draggableId, destination.droppableId));
+    dispatch(
+      updateOwnedTask({ taskId: draggableId, state: destination.droppableId })
+    );
   };
 
   return (

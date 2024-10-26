@@ -4,12 +4,10 @@ import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { useDispatch } from "react-redux";
-import { addTask } from "../Redux/tasks/actions";
 import {
   createOwnedTask,
   updateOwnedTask,
 } from "../Redux/tasks/ownedTaskSlice";
-import { unwrapResult } from "@reduxjs/toolkit";
 
 const taskSchema = yup.object().shape({
   title: yup.string().required("Title is required"),
