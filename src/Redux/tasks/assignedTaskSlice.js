@@ -21,16 +21,20 @@ export const fetchAssignedTasks = createAsyncThunk(
 );
 
 // Update the status of an assigned task
-export const updateAssignedTaskStatus = createAsyncThunk(
-  "assignedTasks/updateAssignedTaskStatus",
-  async ({ taskId, updatedStatus }) => {
+export const changeAssignedTasksState = createAsyncThunk(
+  "assignedTasks/changeAssignedTask",
+  async (editedTask) => {
+    console.log(editedTask);
+
     const response = await axios.put(
-      `https://task-manage-app.glitch.me/api/assigned-tasks/${taskId}`,
-      { status: updatedStatus },
+      `https://task-manage-app.glitch.me/api/assigned-tasks/${editedTask.taskId}`,
+      { state: editedTask.state },
       {
         headers: { Authorization: `Bearer ${loadStorage()}` },
       }
     );
+    console.log(response.data);
+
     return response.data;
   }
 );
@@ -46,7 +50,15 @@ const initialState = {
 const assignedTaskSlice = createSlice({
   name: "assignedTasks",
   initialState,
-  reducers: {},
+  reducers: {
+    moveAssignedTask: (state, action) => {
+      const { taskId, newState } = action.payload;
+      const task = state.items.find((task) => task._id === taskId);
+      if (task) {
+        task.state = newState; // Update state locally
+      }
+    },
+  },
   extraReducers: (builder) => {
     builder
       // Fetch Assigned Tasks
@@ -60,19 +72,9 @@ const assignedTaskSlice = createSlice({
       .addCase(fetchAssignedTasks.rejected, (state, action) => {
         state.status = "failed";
         state.error = action.error.message;
-      })
-
-      // Update Assigned Task Status
-      .addCase(updateAssignedTaskStatus.fulfilled, (state, action) => {
-        const updatedTask = action.payload;
-        const index = state.items.findIndex(
-          (task) => task.id === updatedTask.id
-        );
-        if (index !== -1) {
-          state.items[index] = updatedTask;
-        }
       });
   },
 });
 
 export default assignedTaskSlice.reducer;
+export const { moveAssignedTask } = assignedTaskSlice.actions;

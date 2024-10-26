@@ -9,7 +9,7 @@ export default async function registerRequest(data, navigate, setAuthError) {
     if (response.data.success) {
       sessionStorage.setItem("token", response.data.token);
       // navigate("/", { replace: true });
-      navigate("/board", { replace: true });
+      navigate("/owned-tasks", { replace: true });
     }
   } catch (error) {
     if (error.response && error.response.status === 401) {

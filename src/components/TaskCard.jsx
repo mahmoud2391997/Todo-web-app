@@ -3,7 +3,7 @@ import React from "react";
 import { useDispatch } from "react-redux";
 import { deleteOwnedTask } from "../Redux/tasks/ownedTaskSlice";
 
-const TaskCard = ({ task, edit, setFormType, setTaskToEdit }) => {
+const TaskCard = ({ task, edit, setFormType, setTaskToEdit, type }) => {
   const { title, description, priority, image, assignedToEmail, _id } = task;
   const dispatch = useDispatch();
 
@@ -50,20 +50,22 @@ const TaskCard = ({ task, edit, setFormType, setTaskToEdit }) => {
       </span>
 
       {/* Edit and Delete Buttons */}
-      <div className="mt-4 flex justify-between">
-        <button
-          onClick={() => handleEdit(_id)} // Replace 'id' with your task identifier
-          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition"
-        >
-          Edit
-        </button>
-        <button
-          onClick={() => handleDelete(_id)} // Replace 'id' with your task identifier
-          className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition"
-        >
-          Delete
-        </button>
-      </div>
+      {type == "owned" ? (
+        <div className="mt-4 flex justify-between">
+          <button
+            onClick={() => handleEdit(_id)} // Replace 'id' with your task identifier
+            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition"
+          >
+            Edit
+          </button>
+          <button
+            onClick={() => handleDelete(_id)} // Replace 'id' with your task identifier
+            className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition"
+          >
+            Delete
+          </button>
+        </div>
+      ) : null}
     </div>
   );
 };

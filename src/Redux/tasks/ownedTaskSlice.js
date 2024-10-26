@@ -100,7 +100,7 @@ const ownedTaskSlice = createSlice({
   reducers: {
     moveTask: (state, action) => {
       const { taskId, newState } = action.payload;
-      const task = state.items.find((task) => task.id === taskId);
+      const task = state.items.find((task) => task._id === taskId);
       if (task) {
         task.state = newState; // Update state locally
       }

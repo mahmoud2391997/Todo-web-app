@@ -7,8 +7,7 @@ export default function login(data, navigate, setAuthError) {
       if (response.data.success) {
         sessionStorage.setItem("token", response.data.token);
         // navigate("/", { replace: true });
-        location.reload();
-        navigate("/board", { replace: true });
+        navigate("/owned-tasks", { replace: true });
       }
     })
     .catch((error) => {
