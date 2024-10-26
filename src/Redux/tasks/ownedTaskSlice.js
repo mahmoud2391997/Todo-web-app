@@ -39,14 +39,18 @@ export const createOwnedTask = createAsyncThunk(
 // Update an owned task
 export const updateOwnedTask = createAsyncThunk(
   "ownedTasks/updateOwnedTask",
-  async ({ taskId, updatedData }) => {
+  async (editedTask) => {
+    console.log(editedTask);
+
     const response = await axios.put(
-      `https://task-manage-app.glitch.me/api/owned-tasks/${taskId}`,
-      updatedData,
+      `https://task-manage-app.glitch.me/api/owned-tasks/${editedTask.taskId}`,
+      editedTask,
       {
         headers: { Authorization: `Bearer ${loadStorage()}` },
       }
     );
+    console.log(response.data);
+
     return response.data;
   }
 );
@@ -54,7 +58,7 @@ export const updateOwnedTask = createAsyncThunk(
 // Delete an owned task
 export const deleteOwnedTask = createAsyncThunk(
   "ownedTasks/deleteOwnedTask",
-  async ({ taskId }) => {
+  async (taskId) => {
     await axios.delete(
       `https://task-manage-app.glitch.me/api/owned-tasks/${taskId}`,
       {
@@ -111,7 +115,7 @@ const ownedTaskSlice = createSlice({
       // Delete Owned Task
       .addCase(deleteOwnedTask.fulfilled, (state, action) => {
         const taskId = action.payload;
-        state.items = state.items.filter((task) => task.id !== taskId);
+        state.items = state.items.filter((task) => task._id !== taskId);
       });
   },
 });

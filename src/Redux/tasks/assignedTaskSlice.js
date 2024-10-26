@@ -15,6 +15,7 @@ export const fetchAssignedTasks = createAsyncThunk(
         headers: { Authorization: `Bearer ${loadStorage()}` },
       }
     );
+    console.log(response.data);
     return response.data;
   }
 );

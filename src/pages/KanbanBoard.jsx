@@ -12,17 +12,20 @@ import {
   createOwnedTask,
   fetchOwnedTasks,
 } from "../Redux/tasks/ownedTaskSlice";
+import { fetchAssignedTasks } from "../Redux/tasks/assignedTaskSlice";
 
 const KanbanBoard = ({ type }) => {
   const dispatch = useDispatch();
   const ownedTasks = useSelector((state) => state.ownedTasks.items);
   const assignedTasks = useSelector((state) => state.assignedTasks.items);
-  console.log(ownedTasks);
-
+  const [taskToEdit, setTaskToEdit] = useState(null);
+  const [formType, setFormType] = useState("Add");
   const [isFormOpen, setFormOpen] = useState(false);
   useEffect(() => {
     dispatch(fetchOwnedTasks());
+    dispatch(fetchAssignedTasks());
   }, []);
+
   const columns = {
     todo: "Todo",
     doing: "Doing",
@@ -77,7 +80,10 @@ const KanbanBoard = ({ type }) => {
     <div className="p-4">
       <h1 className="text-2xl font-bold text-center">Kanban Board</h1>
       <button
-        onClick={() => setFormOpen(true)}
+        onClick={() => {
+          setFormOpen(true);
+          setFormType("Add");
+        }}
         className="bg-blue-500 text-white py-2 px-4 rounded mt-4"
       >
         Add New Task
@@ -88,6 +94,8 @@ const KanbanBoard = ({ type }) => {
           closeForm={() => {
             setFormOpen(false);
           }}
+          taskToEdit={taskToEdit}
+          formType={formType}
         />
       )}
 
@@ -118,7 +126,12 @@ const KanbanBoard = ({ type }) => {
                                 {...provided.dragHandleProps}
                                 className="bg-white p-4 mb-4 rounded shadow-md"
                               >
-                                <TaskCard task={task} />
+                                <TaskCard
+                                  task={task}
+                                  edit={setFormOpen}
+                                  setFormType={setFormType}
+                                  setTaskToEdit={setTaskToEdit}
+                                />
                               </div>
                             )}
                           </Draggable>

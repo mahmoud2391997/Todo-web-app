@@ -5,7 +5,11 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { useDispatch } from "react-redux";
 import { addTask } from "../Redux/tasks/actions";
-import { createOwnedTask } from "../Redux/tasks/ownedTaskSlice";
+import {
+  createOwnedTask,
+  updateOwnedTask,
+} from "../Redux/tasks/ownedTaskSlice";
+import { unwrapResult } from "@reduxjs/toolkit";
 
 const taskSchema = yup.object().shape({
   title: yup.string().required("Title is required"),
@@ -25,9 +29,27 @@ const taskSchema = yup.object().shape({
   image: yup.mixed().nullable(),
 });
 
-const TaskForm = ({ closeForm }) => {
+const TaskForm = ({ closeForm, formType, taskToEdit }) => {
   const dispatch = useDispatch();
   const [imagePreview, setImagePreview] = useState(null);
+  const [titleEdit, setTitleEdit] = useState(
+    taskToEdit ? taskToEdit.title : null
+  );
+  const [descriptionEdit, setDescriptionEdit] = useState(
+    taskToEdit ? taskToEdit.description : null
+  );
+  const [stateEdit, setStateEdit] = useState(
+    taskToEdit ? taskToEdit.state : null
+  );
+  const [priorityEdit, setPriorityEdit] = useState(
+    taskToEdit ? taskToEdit.priority : null
+  );
+  const [assignedToEmailEdit, setAssignedToEmailEdit] = useState(
+    taskToEdit ? taskToEdit.assignedToEmail : null
+  );
+  const [imageEdit, setImageEdit] = useState(
+    taskToEdit ? taskToEdit.image : null
+  );
 
   const {
     register,
@@ -38,10 +60,16 @@ const TaskForm = ({ closeForm }) => {
     resolver: yupResolver(taskSchema),
   });
 
-  const handleImageChange = (e) => {
+  const handleImageChange = (e, formType) => {
     const file = e.target.files[0];
-    if (file) {
-      setImagePreview(URL.createObjectURL(file));
+    if (formType == "edit") {
+      if (file) {
+        setImageEdit(URL.createObjectURL(file));
+      }
+    } else {
+      if (file) {
+        setImagePreview(URL.createObjectURL(file));
+      }
     }
   };
 
@@ -62,18 +90,55 @@ const TaskForm = ({ closeForm }) => {
     setImagePreview(null);
     closeForm();
   };
+  const handleEdit = (editedTask) => {
+    console.log(editedTask);
 
+    dispatch(updateOwnedTask({ taskId: taskToEdit._id, ...editedTask }));
+    setImagePreview(null);
+    closeForm();
+  };
   return (
     <div className="p-4 bg-white shadow-md rounded-md">
-      <h2 className="text-lg font-bold mb-4">Create New Task</h2>
-      <form onSubmit={handleSubmit(onSubmit)}>
+      {formType != "edit" ? (
+        <h2 className="text-lg font-bold mb-4">Create New Task</h2>
+      ) : (
+        <h2 className="text-lg font-bold mb-4">Edit Task</h2>
+      )}
+      <form
+        onSubmit={
+          formType != "edit"
+            ? handleSubmit(onSubmit)
+            : (e) => {
+                e.preventDefault();
+                handleEdit({
+                  title: titleEdit,
+                  description: descriptionEdit,
+                  assignedToEmail: assignedToEmailEdit,
+                  priority: priorityEdit,
+                  state: stateEdit,
+                  image: imageEdit,
+                });
+              }
+        }
+      >
         <div className="mb-3">
           <label className="block font-medium">Title</label>
-          <input
-            type="text"
-            className="border p-2 w-full rounded"
-            {...register("title")}
-          />
+          {formType != "edit" ? (
+            <input
+              type="text"
+              className="border p-2 w-full rounded"
+              {...register("title")}
+            />
+          ) : (
+            <input
+              type="text"
+              className="border p-2 w-full rounded"
+              value={titleEdit}
+              onChange={(e) => {
+                setTitleEdit(e.target.value);
+              }}
+            />
+          )}
           {errors.title && (
             <p className="text-red-500">{errors.title.message}</p>
           )}
@@ -81,49 +146,101 @@ const TaskForm = ({ closeForm }) => {
 
         <div className="mb-3">
           <label className="block font-medium">Description</label>
-          <textarea
-            className="border p-2 w-full rounded"
-            rows="3"
-            {...register("description")}
-          ></textarea>
+          {formType != "edit" ? (
+            <textarea
+              className="border p-2 w-full rounded"
+              rows="3"
+              {...register("description")}
+            ></textarea>
+          ) : (
+            <textarea
+              className="border p-2 w-full rounded"
+              rows="3"
+              value={descriptionEdit}
+              onChange={(e) => {
+                setDescriptionEdit(e.target.value);
+              }}
+            ></textarea>
+          )}
           {errors.description && (
             <p className="text-red-500">{errors.description.message}</p>
           )}
         </div>
         <div className="mb-3">
           <label className="block font-medium">Assigned To (Email)</label>
-          <input
-            type="email"
-            className="border p-2 w-full rounded"
-            {...register("assignedTo")}
-            placeholder="Optional"
-          />
+          {formType != "edit" ? (
+            <input
+              type="email"
+              className="border p-2 w-full rounded"
+              {...register("assignedTo")}
+              placeholder="Optional"
+            />
+          ) : (
+            <input
+              type="email"
+              className="border p-2 w-full rounded"
+              value={assignedToEmailEdit}
+              onChange={(e) => {
+                setAssignedToEmailEdit(e.target.value);
+              }}
+            />
+          )}
           {errors.assignedTo && (
             <p className="text-red-500">{errors.assignedTo.message}</p>
           )}
         </div>
         <div className="mb-3">
           <label className="block font-medium">Priority</label>
-          <select
-            className="border p-2 w-full rounded"
-            {...register("priority")}
-          >
-            <option value="Low">Low</option>
-            <option value="Medium">Medium</option>
-            <option value="High">High</option>
-          </select>
+          {formType != "edit" ? (
+            <select
+              className="border p-2 w-full rounded"
+              {...register("priority")}
+            >
+              <option value="Low">Low</option>
+              <option value="Medium">Medium</option>
+              <option value="High">High</option>
+            </select>
+          ) : (
+            <select
+              className="border p-2 w-full rounded"
+              value={priorityEdit}
+              onChange={(e) => {
+                setPriorityEdit(e.target.value);
+              }}
+            >
+              <option value="Low">Low</option>
+              <option value="Medium">Medium</option>
+              <option value="High">High</option>
+            </select>
+          )}
           {errors.priority && (
             <p className="text-red-500">{errors.priority.message}</p>
           )}
         </div>
-
         <div className="mb-3">
           <label className="block font-medium">State</label>
-          <select className="border p-2 w-full rounded" {...register("state")}>
-            <option value="todo">Todo</option>
-            <option value="doing">Doing</option>
-            <option value="done">Done</option>
-          </select>
+          {formType != "edit" ? (
+            <select
+              className="border p-2 w-full rounded"
+              {...register("state")}
+            >
+              <option value="todo">Todo</option>
+              <option value="doing">Doing</option>
+              <option value="done">Done</option>
+            </select>
+          ) : (
+            <select
+              className="border p-2 w-full rounded"
+              value={stateEdit}
+              onChange={(e) => {
+                setStateEdit(e.target.value);
+              }}
+            >
+              <option value="todo">Todo</option>
+              <option value="doing">Doing</option>
+              <option value="done">Done</option>
+            </select>
+          )}
           {errors.state && (
             <p className="text-red-500">{errors.state.message}</p>
           )}
@@ -132,16 +249,28 @@ const TaskForm = ({ closeForm }) => {
         {/* Image Upload */}
         <div className="mb-3">
           <label className="block font-medium">Image (Optional)</label>
-          <input
-            type="file"
-            accept="image/*"
-            className="border p-2 w-full rounded"
-            {...register("image")}
-            onChange={(e) => {
-              handleImageChange(e);
-              register("image").onChange(e);
-            }}
-          />
+          {formType != "edit" ? (
+            <input
+              type="file"
+              accept="image/*"
+              className="border p-2 w-full rounded"
+              {...register("image")}
+              onChange={(e) => {
+                handleImageChange(e);
+                register("image").onChange(e);
+              }}
+            />
+          ) : (
+            <input
+              type="file"
+              accept="image/*"
+              className="border p-2 w-full rounded"
+              value={imageEdit}
+              onChange={(e) => {
+                handleImageChange(e, formType);
+              }}
+            />
+          )}
           {errors.image && (
             <p className="text-red-500">{errors.image.message}</p>
           )}
@@ -157,13 +286,21 @@ const TaskForm = ({ closeForm }) => {
             />
           </div>
         )}
-
-        <button
-          type="submit"
-          className="bg-blue-500 text-white px-4 py-2 rounded"
-        >
-          Add Task
-        </button>
+        {formType != "edit" ? (
+          <button
+            type="submit"
+            className="bg-blue-500 text-white px-4 py-2 rounded"
+          >
+            Add Task
+          </button>
+        ) : (
+          <button
+            type="submit"
+            className="bg-blue-500 text-white px-4 py-2 rounded"
+          >
+            Edit Task
+          </button>
+        )}
         <button
           type="button"
           onClick={closeForm}

@@ -1,9 +1,20 @@
 // src/features/todos/TaskCard.js
 import React from "react";
+import { useDispatch } from "react-redux";
+import { deleteOwnedTask } from "../Redux/tasks/ownedTaskSlice";
 
-const TaskCard = ({ task }) => {
-  const { title, description, priority, image, assignedTo } = task;
+const TaskCard = ({ task, edit, setFormType, setTaskToEdit }) => {
+  const { title, description, priority, image, assignedToEmail, _id } = task;
+  const dispatch = useDispatch();
 
+  const handleDelete = (id) => {
+    dispatch(deleteOwnedTask(id));
+  };
+  const handleEdit = (id) => {
+    edit(true);
+    setFormType("edit");
+    setTaskToEdit(task);
+  };
   // Priority color based on the task's priority
   const priorityColors = {
     low: "bg-green-100 text-green-800",
@@ -29,7 +40,7 @@ const TaskCard = ({ task }) => {
       <p className="text-sm text-gray-600 mb-4">{description}</p>
 
       <p className="text-sm mb-2">
-        <strong>Assigned To:</strong> {assignedTo}
+        <strong>Assigned To:</strong> {assignedToEmail}
       </p>
       {/* Priority */}
       <span
@@ -37,6 +48,22 @@ const TaskCard = ({ task }) => {
       >
         Priority: {priority.charAt(0).toUpperCase() + priority.slice(1)}
       </span>
+
+      {/* Edit and Delete Buttons */}
+      <div className="mt-4 flex justify-between">
+        <button
+          onClick={() => handleEdit(_id)} // Replace 'id' with your task identifier
+          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition"
+        >
+          Edit
+        </button>
+        <button
+          onClick={() => handleDelete(_id)} // Replace 'id' with your task identifier
+          className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition"
+        >
+          Delete
+        </button>
+      </div>
     </div>
   );
 };
