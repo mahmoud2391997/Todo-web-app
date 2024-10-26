@@ -19,6 +19,7 @@ import {
   moveAssignedTask,
 } from "../Redux/tasks/assignedTaskSlice";
 import TaskFilter from "../components/TaskFilter";
+import NavBar from "../components/Navbar";
 
 const KanbanBoard = ({ type }) => {
   const dispatch = useDispatch();
@@ -129,7 +130,8 @@ const KanbanBoard = ({ type }) => {
     }
   };
 
-  return (
+  return (<>
+  <NavBar></NavBar>
     <div className="p-4">
       {type == "owned" ? (
         <h1 className="text-2xl font-bold text-center">
@@ -255,6 +257,7 @@ const KanbanBoard = ({ type }) => {
         </div>
       </DragDropContext>
     </div>
+                                </>
   );
 };
 

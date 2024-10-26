@@ -6,7 +6,6 @@ const NavBar = () => {
   const navigate = useNavigate();
   const handleLogout = () => {
     sessionStorage.removeItem("token");
-    location.reload();
 
     navigate("/login", { replace: true });
   };
