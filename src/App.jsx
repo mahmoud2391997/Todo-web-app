@@ -16,12 +16,28 @@ function App() {
       <Routes>
         <Route
           path="/login"
-          element={!loadStorage() ? <Login /> : <Navigate to="/board" />}
+          element={!loadStorage() ? <Login /> : <Navigate to="/owned-tasks" />}
         />
         <Route path="/register" element={<Register />} />
         <Route
-          path="/board"
-          element={loadStorage() ? <KanbanBoard /> : <Navigate to="/login" />}
+          path="/owned-tasks"
+          element={
+            loadStorage() ? (
+              <KanbanBoard type={"owned"} />
+            ) : (
+              <Navigate to="/login" />
+            )
+          }
+        />
+        <Route
+          path="/assigned-tasks"
+          element={
+            loadStorage() ? (
+              <KanbanBoard type={"assigned"} />
+            ) : (
+              <Navigate to="/login" />
+            )
+          }
         />
         <Route path="*" element={<Navigate to="/login" />} />
       </Routes>

@@ -1,20 +1,28 @@
 // src/features/todos/KanbanBoard.js
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as Yup from "yup";
-import { addTask, changeTaskState } from "../Redux/todos/actions";
+import { addTask, changeTaskState } from "../Redux/tasks/actions";
 import TaskForm from "../components/TaskForm";
 import TaskCard from "../components/TaskCard";
+import {
+  createOwnedTask,
+  fetchOwnedTasks,
+} from "../Redux/tasks/ownedTaskSlice";
 
-const KanbanBoard = () => {
+const KanbanBoard = ({ type }) => {
   const dispatch = useDispatch();
-  const tasks = useSelector((state) => state.todos.todos);
+  const ownedTasks = useSelector((state) => state.ownedTasks.items);
+  const assignedTasks = useSelector((state) => state.assignedTasks.items);
+  console.log(ownedTasks);
 
   const [isFormOpen, setFormOpen] = useState(false);
-
+  useEffect(() => {
+    dispatch(fetchOwnedTasks());
+  }, []);
   const columns = {
     todo: "Todo",
     doing: "Doing",
@@ -49,7 +57,7 @@ const KanbanBoard = () => {
       ...data,
       id: Date.now().toString(),
     };
-    dispatch(addTask(newTask));
+    dispatch(createOwnedTask(newTask));
     reset();
     setFormOpen(false);
   };
@@ -94,26 +102,47 @@ const KanbanBoard = () => {
                   className="w-1/3 bg-gray-100 p-4 rounded-lg shadow-md"
                 >
                   <h3 className="text-lg font-bold mb-4">{columnTitle}</h3>
-                  {tasks
-                    .filter((task) => task.state === columnId)
-                    .map((task, index) => (
-                      <Draggable
-                        key={task.id}
-                        draggableId={task.id}
-                        index={index}
-                      >
-                        {(provided) => (
-                          <div
-                            ref={provided.innerRef}
-                            {...provided.draggableProps}
-                            {...provided.dragHandleProps}
-                            className="bg-white p-4 mb-4 rounded shadow-md"
+                  {type == "owned"
+                    ? ownedTasks
+                        .filter((task) => task.state === columnId)
+                        .map((task, index) => (
+                          <Draggable
+                            key={task._id}
+                            draggableId={task._id}
+                            index={index}
                           >
-                            <TaskCard task={task} />
-                          </div>
-                        )}
-                      </Draggable>
-                    ))}
+                            {(provided) => (
+                              <div
+                                ref={provided.innerRef}
+                                {...provided.draggableProps}
+                                {...provided.dragHandleProps}
+                                className="bg-white p-4 mb-4 rounded shadow-md"
+                              >
+                                <TaskCard task={task} />
+                              </div>
+                            )}
+                          </Draggable>
+                        ))
+                    : assignedTasks
+                        .filter((task) => task.state === columnId)
+                        .map((task, index) => (
+                          <Draggable
+                            key={task._id}
+                            draggableId={task._id}
+                            index={index}
+                          >
+                            {(provided) => (
+                              <div
+                                ref={provided.innerRef}
+                                {...provided.draggableProps}
+                                {...provided.dragHandleProps}
+                                className="bg-white p-4 mb-4 rounded shadow-md"
+                              >
+                                <TaskCard task={task} />
+                              </div>
+                            )}
+                          </Draggable>
+                        ))}
                   {provided.placeholder}
                 </div>
               )}

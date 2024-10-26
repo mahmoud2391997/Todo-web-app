@@ -2,7 +2,7 @@
 import React from "react";
 
 const TaskCard = ({ task }) => {
-  const { title, description, priority, image } = task;
+  const { title, description, priority, image, assignedTo } = task;
 
   // Priority color based on the task's priority
   const priorityColors = {
@@ -28,6 +28,9 @@ const TaskCard = ({ task }) => {
       {/* Task Description */}
       <p className="text-sm text-gray-600 mb-4">{description}</p>
 
+      <p className="text-sm mb-2">
+        <strong>Assigned To:</strong> {assignedTo}
+      </p>
       {/* Priority */}
       <span
         className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${priorityColors[priority]}`}

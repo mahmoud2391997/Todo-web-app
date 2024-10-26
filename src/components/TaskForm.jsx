@@ -4,34 +4,25 @@ import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { useDispatch } from "react-redux";
-import { addTask } from "../Redux/todos/actions";
+import { addTask } from "../Redux/tasks/actions";
+import { createOwnedTask } from "../Redux/tasks/ownedTaskSlice";
 
 const taskSchema = yup.object().shape({
   title: yup.string().required("Title is required"),
   description: yup.string().required("Description is required"),
+  assignedTo: yup
+    .string()
+    .email("Assigned email must be valid") // Optional email validation
+    .nullable(),
   priority: yup
     .string()
-    .oneOf(["low", "medium", "high"])
+    .oneOf(["Low", "Medium", "High"])
     .required("Priority is required"),
   state: yup
     .string()
     .oneOf(["todo", "doing", "done"])
     .required("State is required"),
-  image: yup
-    .mixed()
-    .test(
-      "fileSize",
-      "File Size is too large",
-      (value) => value && value[0] && value[0].size <= 1024 * 1024
-    ) // 1MB
-    .test(
-      "fileType",
-      "Unsupported File Format",
-      (value) =>
-        value &&
-        value[0] &&
-        ["image/jpeg", "image/png", "image/gif"].includes(value[0].type)
-    ),
+  image: yup.mixed().nullable(),
 });
 
 const TaskForm = ({ closeForm }) => {
@@ -57,14 +48,16 @@ const TaskForm = ({ closeForm }) => {
   const onSubmit = (data) => {
     const taskData = {
       id: Date.now().toString(),
+
       title: data.title,
       description: data.description,
+      assignedToEmail: data.assignedTo || null, // Assign null if empty
       priority: data.priority,
       state: data.state,
       image: imagePreview,
     };
 
-    dispatch(addTask(taskData));
+    dispatch(createOwnedTask(taskData));
     reset();
     setImagePreview(null);
     closeForm();
@@ -97,16 +90,27 @@ const TaskForm = ({ closeForm }) => {
             <p className="text-red-500">{errors.description.message}</p>
           )}
         </div>
-
+        <div className="mb-3">
+          <label className="block font-medium">Assigned To (Email)</label>
+          <input
+            type="email"
+            className="border p-2 w-full rounded"
+            {...register("assignedTo")}
+            placeholder="Optional"
+          />
+          {errors.assignedTo && (
+            <p className="text-red-500">{errors.assignedTo.message}</p>
+          )}
+        </div>
         <div className="mb-3">
           <label className="block font-medium">Priority</label>
           <select
             className="border p-2 w-full rounded"
             {...register("priority")}
           >
-            <option value="low">Low</option>
-            <option value="medium">Medium</option>
-            <option value="high">High</option>
+            <option value="Low">Low</option>
+            <option value="Medium">Medium</option>
+            <option value="High">High</option>
           </select>
           {errors.priority && (
             <p className="text-red-500">{errors.priority.message}</p>
@@ -127,7 +131,7 @@ const TaskForm = ({ closeForm }) => {
 
         {/* Image Upload */}
         <div className="mb-3">
-          <label className="block font-medium">Image</label>
+          <label className="block font-medium">Image (Optional)</label>
           <input
             type="file"
             accept="image/*"
