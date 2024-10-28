@@ -263,7 +263,6 @@ const TaskForm = ({ closeForm, formType, taskToEdit }) => {
               type="file"
               accept="image/*"
               className="border p-2 w-full rounded"
-              value={imageEdit}
               onChange={(e) => {
                 handleImageChange(e, formType);
               }}
