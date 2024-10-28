@@ -143,7 +143,7 @@ const KanbanBoard = ({ type }) => {
         </h1>
       )}
       <TaskFilter setSearchTerm={setSearchTerm} setPriority={setPriority} />
-      {type == "owned" && (
+      {type == "owned" && !isFormOpen ? (
         <button
           onClick={() => {
             setFormOpen(true);
@@ -153,7 +153,9 @@ const KanbanBoard = ({ type }) => {
         >
           Add New Task
         </button>
-      )}{" "}
+      )
+         : null}
+    
       {isFormOpen && (
         <TaskForm
           closeForm={() => {

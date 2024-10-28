@@ -45,7 +45,7 @@ const TaskForm = ({ closeForm, formType, taskToEdit }) => {
     taskToEdit ? taskToEdit.priority : null
   );
   const [assignedToEmailEdit, setAssignedToEmailEdit] = useState(
-    taskToEdit ? taskToEdit.assignedToEmail : null
+    taskToEdit ? taskToEdit.assignedToEmail != null ? taskToEdit.assignedToEmail : "" : null
   );
   const [imageEdit, setImageEdit] = useState(
     taskToEdit ? taskToEdit.image : null
@@ -59,6 +59,7 @@ const TaskForm = ({ closeForm, formType, taskToEdit }) => {
   } = useForm({
     resolver: yupResolver(taskSchema),
   });
+console.log(taskToEdit);
 
   const handleImageChange = (e, formType) => {
     const file = e.target.files[0];
@@ -87,7 +88,7 @@ const TaskForm = ({ closeForm, formType, taskToEdit }) => {
     formData.append("id", Date.now().toString());
     formData.append("title", data.title);
     formData.append("description", data.description);
-    formData.append("assignedToEmail", data.assignedTo || null); // Null if empty
+    formData.append("assignedToEmail", data.assignedTo ); // Null if empty
     formData.append("priority", data.priority);
     formData.append("state", data.state);
 
@@ -127,8 +128,7 @@ const TaskForm = ({ closeForm, formType, taskToEdit }) => {
         onSubmit={
           formType != "edit"
             ? handleSubmit(onSubmit)
-            : (e) => {
-                e.preventDefault();
+            : () => {
                 handleEdit({
                   title: titleEdit,
                   description: descriptionEdit,
