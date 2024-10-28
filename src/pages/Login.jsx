@@ -25,9 +25,9 @@ const LoginForm = () => {
     resolver: yupResolver(loginSchema),
   });
 
-  const onSubmit = (data) => {
+  const onSubmit = async (data) => {
     console.log(data);
-    login(data, navigate, setAuthError);
+    await login(data, navigate, setAuthError);
   };
 
   return (
