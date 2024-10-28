@@ -29,6 +29,8 @@ const taskSchema = yup.object().shape({
 
 const TaskForm = ({ closeForm, formType, taskToEdit }) => {
   const dispatch = useDispatch();
+  const [selectedFile, setSelectedFile] = useState(null);
+
   const [imagePreview, setImagePreview] = useState(null);
   const [titleEdit, setTitleEdit] = useState(
     taskToEdit ? taskToEdit.title : null
@@ -62,28 +64,34 @@ const TaskForm = ({ closeForm, formType, taskToEdit }) => {
     const file = e.target.files[0];
     if (formType == "edit") {
       if (file) {
+        setSelectedFile(file);
+
         setImageEdit(URL.createObjectURL(file));
       }
     } else {
       if (file) {
+        setSelectedFile(file);
+
         setImagePreview(URL.createObjectURL(file));
       }
     }
   };
 
-  const onSubmit = (data) => {
-    const taskData = {
-      id: Date.now().toString(),
+  const onSubmit = async (data) => {
+    const formData = new FormData();
 
-      title: data.title,
-      description: data.description,
-      assignedToEmail: data.assignedTo || null, // Assign null if empty
-      priority: data.priority,
-      state: data.state,
-      image: imagePreview,
-    };
+    // Add the image file to FormData
+    formData.append("image", selectedFile);
 
-    dispatch(createOwnedTask(taskData));
+    // Add task details to FormData
+    formData.append("id", Date.now().toString());
+    formData.append("title", data.title);
+    formData.append("description", data.description);
+    formData.append("assignedToEmail", data.assignedTo || null); // Null if empty
+    formData.append("priority", data.priority);
+    formData.append("state", data.state);
+
+    await dispatch(createOwnedTask(formData));
     reset();
     setImagePreview(null);
     closeForm();
@@ -91,7 +99,20 @@ const TaskForm = ({ closeForm, formType, taskToEdit }) => {
   const handleEdit = (editedTask) => {
     console.log(editedTask);
 
-    dispatch(updateOwnedTask({ taskId: taskToEdit._id, ...editedTask }));
+    const formData = new FormData();
+
+    // Add the image file to FormData
+    formData.append("image", selectedFile);
+
+    // Add task details to FormData
+    formData.append("taskId", taskToEdit._id);
+    formData.append("title", editedTask.title);
+    formData.append("description", editedTask.description);
+    formData.append("assignedToEmail", editedTask.assignedTo || null); // Null if empty
+    formData.append("priority", editedTask.priority);
+    formData.append("state", editedTask.state);
+
+    dispatch(updateOwnedTask(formData));
     setImagePreview(null);
     closeForm();
   };

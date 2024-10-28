@@ -5,6 +5,15 @@ import { deleteOwnedTask } from "../Redux/tasks/ownedTaskSlice";
 
 const TaskCard = ({ task, edit, setFormType, setTaskToEdit, type }) => {
   const { title, description, priority, image, assignedToEmail, _id } = task;
+  console.log(image);
+  function getImage(image) {
+    if (image) {
+      const binaryString = Array.from(image.data.data)
+        .map((byte) => String.fromCharCode(byte))
+        .join("");
+      return window.btoa(binaryString);
+    }
+  }
   const dispatch = useDispatch();
 
   const handleDelete = (id) => {
@@ -27,7 +36,7 @@ const TaskCard = ({ task, edit, setFormType, setTaskToEdit, type }) => {
       {/* Task Image */}
       {image && (
         <img
-          src={image}
+          src={`data:${image.contentType};base64,${getImage(image)}`}
           alt={title}
           className="w-full h-32 object-cover rounded mb-4"
         />

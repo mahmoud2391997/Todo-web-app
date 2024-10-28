@@ -28,7 +28,10 @@ export const createOwnedTask = createAsyncThunk(
       "https://task-manage-app.glitch.me/api/owned-tasks",
       task,
       {
-        headers: { Authorization: `Bearer ${loadStorage()}` },
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${loadStorage()}`,
+        },
       }
     );
     console.log(response.data);
@@ -40,18 +43,26 @@ export const createOwnedTask = createAsyncThunk(
 export const updateOwnedTask = createAsyncThunk(
   "ownedTasks/updateOwnedTask",
   async (editedTask) => {
-    console.log(editedTask);
+    for (let [key, value] of editedTask.entries()) {
+      console.log(key);
 
-    const response = await axios.put(
-      `https://task-manage-app.glitch.me/api/owned-tasks/${editedTask.taskId}`,
-      editedTask,
-      {
-        headers: { Authorization: `Bearer ${loadStorage()}` },
+      if (key == "taskId") {
+        const response = await axios.put(
+          `https://task-manage-app.glitch.me/api/owned-tasks/${value}`,
+          editedTask,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+
+              Authorization: `Bearer ${loadStorage()}`,
+            },
+          }
+        );
+        console.log(response.data);
+
+        return response.data;
       }
-    );
-    console.log(response.data);
-
-    return response.data;
+    }
   }
 );
 export const changeOwnedTasksState = createAsyncThunk(
