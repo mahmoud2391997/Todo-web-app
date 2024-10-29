@@ -29,16 +29,19 @@ const KanbanBoard = ({ type }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [priority, setPriority] = useState("");
 
-  useEffect(() => {
-    dispatch(fetchOwnedTasks());
-    dispatch(fetchAssignedTasks());
-  }, []);
-  const ownedTasks = useSelector((state) => state.ownedTasks.items);
-  const assignedTasks = useSelector((state) => state.assignedTasks.items);
-  const [filteredTasks, setFilteredTasks] = useState(
-    type === "owned" ? ownedTasks : assignedTasks
-  );
-  const tasks = type === "owned" ? ownedTasks : assignedTasks;
+  
+  const { items, status, error } = useSelector((state) =>
+    type === 'owned' ? state.ownedTasks : state.assignedTasks
+);
+const [filteredTasks, setFilteredTasks] = useState(
+  items
+);
+const tasks = items;
+useEffect(() => {
+  if (status === 'idle') {
+    dispatch(type === 'owned' ? fetchOwnedTasks() : fetchAssignedTasks());
+  }
+}, [status, dispatch, type]);
 
   useEffect(() => {
     const filtered = tasks.filter((task) => {
@@ -130,86 +133,64 @@ const KanbanBoard = ({ type }) => {
     }
   };
 
-  return (<>
-  <NavBar></NavBar>
-    <div className="p-4">
-      {type == "owned" ? (
-        <h1 className="text-2xl font-bold text-center">
-          Owned Tasks Kanban Board
-        </h1>
-      ) : (
-        <h1 className="text-2xl font-bold text-center">
-          Assigned Tasks Kanban Board
-        </h1>
-      )}
-      <TaskFilter setSearchTerm={setSearchTerm} setPriority={setPriority} />
-      {type == "owned" && !isFormOpen ? (
-        <button
-          onClick={() => {
-            setFormOpen(true);
-            setFormType("Add");
-          }}
-          className="bg-blue-500 text-white py-2 px-4 rounded mt-4"
-        >
-          Add New Task
-        </button>
-      )
-         : null}
-    
-      {isFormOpen && (
-        <TaskForm
-          closeForm={() => {
-            setFormOpen(false);
-          }}
-          taskToEdit={taskToEdit}
-          formType={formType}
-        />
-      )}
-      <DragDropContext onDragEnd={onDragEnd}>
-        <div className="flex justify-between space-x-4 mt-6">
-          {Object.entries(columns).map(([columnId, columnTitle]) => (
-            <Droppable droppableId={columnId} key={columnId}>
-              {(provided) => (
-                <div
-                  ref={provided.innerRef}
-                  {...provided.droppableProps}
-                  className="w-1/3 bg-gray-100 p-4 rounded-lg shadow-md"
-                >
-                  <h3 className="text-lg font-bold mb-4">{columnTitle}</h3>
-                  {
-                    // Use a consistent approach to check for the filteredTasks length
-                    searchTerm || priority
-                      ? // Determine which set of tasks to use
-                        filteredTasks
+
+ 
+
+
+  return (
+    <>
+      <NavBar />
+      <div className="p-4">
+        {type === 'owned' ? (
+          <h1 className="text-2xl font-bold text-center">Owned Tasks Kanban Board</h1>
+        ) : (
+          <h1 className="text-2xl font-bold text-center">Assigned Tasks Kanban Board</h1>
+        )}
+
+        <TaskFilter setSearchTerm={setSearchTerm} setPriority={setPriority} />
+
+        {status === 'loading' && <p>Loading tasks...</p>}
+        {status === 'failed' && <p>Error: {error}</p>}
+
+        {status === 'succeeded' && (
+          <>
+            {type === 'owned' && !isFormOpen && (
+              <button
+                onClick={() => {
+                  setFormOpen(true);
+                  setFormType('Add');
+                }}
+                className="bg-blue-500 text-white py-2 px-4 rounded mt-4"
+              >
+                Add New Task
+              </button>
+            )}
+
+            {isFormOpen && (
+              <TaskForm
+                closeForm={() => {
+                  setFormOpen(false);
+                }}
+                taskToEdit={taskToEdit}
+                formType={formType}
+              />
+            )}
+
+            <DragDropContext onDragEnd={onDragEnd}>
+              <div className="flex justify-between space-x-4 mt-6">
+                {Object.entries(columns).map(([columnId, columnTitle]) => (
+                  <Droppable droppableId={columnId} key={columnId}>
+                    {(provided) => (
+                      <div
+                        ref={provided.innerRef}
+                        {...provided.droppableProps}
+                        className="w-1/3 bg-gray-100 p-4 rounded-lg shadow-md"
+                      >
+                        <h3 className="text-lg font-bold mb-4">{columnTitle}</h3>
+                        {(searchTerm || priority ? filteredTasks : items)
                           .filter((task) => task.state === columnId)
                           .map((task, index) => (
-                            <Draggable
-                              key={task._id}
-                              draggableId={task._id}
-                              index={index}
-                            >
-                              {(provided) => (
-                                <div
-                                  ref={provided.innerRef}
-                                  {...provided.draggableProps}
-                                  {...provided.dragHandleProps}
-                                  className="bg-white p-4 mb-4 rounded shadow-md"
-                                >
-                                  <TaskCard task={task} type={type} />
-                                </div>
-                              )}
-                            </Draggable>
-                          ))
-                      : type === "owned"
-                      ? // Render owned tasks if no filtered tasks
-                        ownedTasks
-                          .filter((task) => task.state === columnId)
-                          .map((task, index) => (
-                            <Draggable
-                              key={task._id}
-                              draggableId={task._id}
-                              index={index}
-                            >
+                            <Draggable key={task._id} draggableId={task._id} index={index}>
                               {(provided) => (
                                 <div
                                   ref={provided.innerRef}
@@ -227,40 +208,20 @@ const KanbanBoard = ({ type }) => {
                                 </div>
                               )}
                             </Draggable>
-                          ))
-                      : // Render assigned tasks if no filtered tasks and type is not owned
-                        assignedTasks
-                          .filter((task) => task.state === columnId)
-                          .map((task, index) => (
-                            <Draggable
-                              key={task._id}
-                              draggableId={task._id}
-                              index={index}
-                            >
-                              {(provided) => (
-                                <div
-                                  ref={provided.innerRef}
-                                  {...provided.draggableProps}
-                                  {...provided.dragHandleProps}
-                                  className="bg-white p-4 mb-4 rounded shadow-md"
-                                >
-                                  <TaskCard task={task} type={type} />
-                                </div>
-                              )}
-                            </Draggable>
-                          ))
-                  }
-
-                  {provided.placeholder}
-                </div>
-              )}
-            </Droppable>
-          ))}
-        </div>
-      </DragDropContext>
-    </div>
-                                </>
+                          ))}
+                        {provided.placeholder}
+                      </div>
+                    )}
+                  </Droppable>
+                ))}
+              </div>
+            </DragDropContext>
+          </>
+        )}
+      </div>
+    </>
   );
 };
+
 
 export default KanbanBoard;
