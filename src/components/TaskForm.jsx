@@ -109,7 +109,7 @@ console.log(taskToEdit);
     formData.append("taskId", taskToEdit._id);
     formData.append("title", editedTask.title);
     formData.append("description", editedTask.description);
-    formData.append("assignedToEmail", editedTask.assignedTo || null); // Null if empty
+    formData.append("assignedToEmail", editedTask.assignedToEmail || ""); // Null if empty
     formData.append("priority", editedTask.priority);
     formData.append("state", editedTask.state);
 
