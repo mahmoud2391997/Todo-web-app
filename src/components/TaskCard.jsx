@@ -4,8 +4,8 @@ import { useDispatch } from "react-redux";
 import { deleteOwnedTask } from "../Redux/tasks/ownedTaskSlice";
 
 const TaskCard = ({ task, edit, setFormType, setTaskToEdit, type }) => {
+
   const { title, description, priority, image, assignedToEmail, _id } = task;
-  console.log(image);
   function getImage(image) {
     if (image) {
       const binaryString = Array.from(image.data.data)

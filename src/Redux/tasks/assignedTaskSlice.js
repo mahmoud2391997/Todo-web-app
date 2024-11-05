@@ -42,6 +42,9 @@ export const changeAssignedTasksState = createAsyncThunk(
 // Initial state
 const initialState = {
   items: [],
+  filteredTasks: [],
+  searchTerm: '',
+  priority:"All Priorities",
   status: "idle",
   error: null,
 };
@@ -57,7 +60,51 @@ const assignedTaskSlice = createSlice({
       if (task) {
         task.state = newState; // Update state locally
       }
+    },// Selector for filtering tasks based on search term only
+    searchFilteredTasksSelector: (state) => {
+      const { items, searchTerm } = state;
+    
+      // Return all items if search query is empty
+      if (!searchTerm) return ;
+    
+      // Filter items by search query
+      state.filteredTasks =   [...items].filter((task) =>
+        task.title.toLowerCase().includes(searchTerm.toLowerCase())
+      );
     },
+    
+    // Selector for filtering tasks based on priority and optionally by search query
+    priorityFilteredTasksSelector: (state) => {
+      const { items, priority, searchTerm } = state;
+    
+      console.log(priority);
+      // Filter by selected priority
+      state.filteredTasks = priority === "All Priorities" ? items : [...items].filter((task) => task.priority === priority);
+    console.log(state.filteredTasks );
+    
+      // Further filter by search query if provided
+      if (searchTerm) {
+        state.filteredTasks = [...state.filteredTasks].filter((task) =>
+          task.title.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+      }
+    
+    },
+    
+    // Action to set search query
+    setSearchQuery: (state, action) => {
+      state.searchTerm = action.payload;
+      console.log(state.searchTerm);
+      
+    },
+    
+    // Action to set selected priority
+    setSelectedPriority: (state, action) => {
+      state.priority = action.payload;
+      console.log( state.priority);
+      
+    },
+    
   },
   extraReducers: (builder) => {
     builder
@@ -76,5 +123,6 @@ const assignedTaskSlice = createSlice({
   },
 });
 
+
 export default assignedTaskSlice.reducer;
-export const { moveAssignedTask } = assignedTaskSlice.actions;
+export const { moveAssignedTask,searchFilteredTasksSelector, priorityFilteredTasksSelector,setSearchQuery,setSelectedPriority} = assignedTaskSlice.actions;

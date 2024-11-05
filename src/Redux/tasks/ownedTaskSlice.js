@@ -100,6 +100,9 @@ export const deleteOwnedTask = createAsyncThunk(
 // Initial state
 const initialState = {
   items: [],
+  filteredTasks: [],
+  searchTerm: '',
+  priority:"All Priorities",
   status: "idle",
   error: null,
 };
@@ -115,6 +118,41 @@ const ownedTaskSlice = createSlice({
       if (task) {
         task.state = newState; // Update state locally
       }
+      
+    },
+    filteredTasksSelector : (state) => {
+      const { items, searchTerm } = state;
+      
+      if (searchTerm == "") {
+        return 
+      }
+      state.filteredTasks = [...items].filter((task) =>
+        task.title.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    console.log(state.filteredTasks);
+    console.log(searchTerm);
+    },
+    prioritySelector : (state) => {
+      const { items, priority,searchTerm } = state;
+      
+      state.filteredTasks = priority === "All Priorities" ? items : [...items].filter((task) => task.priority === priority);
+console.log(state.filteredTasks);
+
+  // Filter by search term
+  if (searchTerm) {
+    state.filteredTasks = [...state.filteredTasks].filter((task) =>
+      task.title.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }
+
+    },
+    setReduxSearchTerm: (state, action) => {
+      state.searchTerm = action.payload;
+    },
+    setReduxPriority: (state, action) => {
+      console.log(action.payload);
+      
+      state.priority = action.payload;
     },
   },
   extraReducers: (builder) => {
@@ -155,6 +193,8 @@ const ownedTaskSlice = createSlice({
       });
   },
 });
+// Selector to get filtered tasks based on search term
+
 
 export default ownedTaskSlice.reducer;
-export const { moveTask } = ownedTaskSlice.actions;
+export const { moveTask ,filteredTasksSelector,setReduxSearchTerm,setReduxPriority,prioritySelector} = ownedTaskSlice.actions;
